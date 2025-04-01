@@ -96,12 +96,6 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
               {isLoading ? 'Signing in...' : 'Sign In'}
             </button>
           </form>
-          
-          <div className="mt-6 text-center text-sm text-muted-foreground">
-            <p className="mb-2">Demo Credentials:</p>
-            <p>Username: admin</p>
-            <p>Password: rnradmin2023</p>
-          </div>
         </div>
       </div>
     </div>

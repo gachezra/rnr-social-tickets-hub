@@ -58,12 +58,6 @@ const SiteHeader: React.FC = () => {
             >
               About
             </Link>
-            <Link 
-              to="/admin-panel" 
-              className="btn-primary"
-            >
-              Admin Panel
-            </Link>
           </nav>
 
           {/* Mobile Menu Button */}
@@ -124,13 +118,6 @@ const SiteHeader: React.FC = () => {
                 onClick={closeMenu}
               >
                 About
-              </Link>
-              <Link 
-                to="/admin-panel" 
-                className="btn-primary w-full justify-center mt-4"
-                onClick={closeMenu}
-              >
-                Admin Panel
               </Link>
             </nav>
           </div>
