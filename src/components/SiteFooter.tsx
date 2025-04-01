@@ -74,6 +74,11 @@ const SiteFooter: React.FC = () => {
                   About Us
                 </Link>
               </li>
+              <li>
+                <Link to="/admin-panel" className="text-muted-foreground hover:text-primary transition-colors">
+                  Manage
+                </Link>
+              </li>
             </ul>
           </div>
 
