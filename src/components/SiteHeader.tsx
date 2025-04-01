@@ -56,7 +56,7 @@ const SiteHeader: React.FC = () => {
               to="/about" 
               className={`nav-link ${isActive('/about') ? 'active' : ''}`}
             >
-              About
+              About 
             </Link>
           </nav>
 
