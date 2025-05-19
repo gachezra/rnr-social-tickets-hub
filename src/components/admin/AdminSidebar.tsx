@@ -91,7 +91,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ onLogout }) => {
           Check-In
         </NavLink>
         
-        <NavLink 
+{/*         <NavLink 
           to="/admin-panel/settings" 
           className={({ isActive }) => 
             `flex items-center px-4 py-2 rounded-md transition-colors ${
@@ -103,7 +103,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ onLogout }) => {
         >
           <Settings size={20} className="mr-3" />
           Settings
-        </NavLink>
+        </NavLink> */}
         
         <a 
           href="/"
