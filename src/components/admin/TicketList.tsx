@@ -2,6 +2,7 @@
 import React from 'react';
 import { Ticket, Event } from '../../types';
 import { formatDisplayDate, getStatusText } from '../../utils/helpers';
+import { Button } from '../ui/button';
 
 interface TicketListProps {
   tickets: Ticket[];
@@ -50,7 +51,9 @@ const TicketList: React.FC<TicketListProps> = ({ tickets, events, onStatusChange
                   <td className="px-4 py-3 text-sm">{ticket.email}</td>
                   <td className="px-4 py-3 text-sm">{ticket.mpesaPhone || '-'}</td>
                   <td className="px-4 py-3 text-sm">{ticket.quantity}</td>
-                  <td className="px-4 py-3 text-sm">{formatDisplayDate(ticket.createdAt)}</td>
+                  <td className="px-4 py-3 text-sm">
+                    {ticket.createdAt ? formatDisplayDate(ticket.createdAt) : '-'}
+                  </td>
                   <td className="px-4 py-3 text-sm">
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusInfo.colorClass}`}>
                       {statusInfo.text}

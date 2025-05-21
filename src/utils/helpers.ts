@@ -1,10 +1,34 @@
-
 import { format, parseISO } from 'date-fns';
 import { TicketStatus, EventStatus } from '../types';
 
 // Format date to display in a user-friendly way
-export const formatDisplayDate = (dateString: string): string => {
-  return format(parseISO(dateString), 'EEEE, MMMM d, yyyy');
+export const formatDisplayDate = (dateString: string | Date | null | undefined): string => {
+  if (!dateString) {
+    return 'No date available';
+  }
+  
+  try {
+    // If it's already a Date object
+    if (dateString instanceof Date) {
+      return format(dateString, 'EEEE, MMMM d, yyyy');
+    }
+    
+    // If it's a timestamp from Firestore (object with seconds and nanoseconds)
+    if (typeof dateString === 'object' && 'seconds' in dateString) {
+      const timestamp = new Date((dateString.seconds) * 1000);
+      return format(timestamp, 'EEEE, MMMM d, yyyy');
+    }
+    
+    // If it's a string (ISO format)
+    if (typeof dateString === 'string') {
+      return format(parseISO(dateString), 'EEEE, MMMM d, yyyy');
+    }
+    
+    return 'Invalid date';
+  } catch (error) {
+    console.error('Error formatting date:', error, dateString);
+    return 'Invalid date format';
+  }
 };
 
 // Format time to display in a user-friendly way
