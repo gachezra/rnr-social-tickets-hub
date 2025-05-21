@@ -6,14 +6,28 @@ import { auth, db, storage } from '../utils/firebase';
 export const useFirebase = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setCurrentUser(user);
-      setLoading(false);
-    });
+    try {
+      const unsubscribe = onAuthStateChanged(auth, 
+        (user) => {
+          setCurrentUser(user);
+          setLoading(false);
+        },
+        (error) => {
+          console.error('Auth state change error:', error);
+          setError(error);
+          setLoading(false);
+        }
+      );
 
-    return () => unsubscribe();
+      return () => unsubscribe();
+    } catch (err) {
+      console.error('Firebase hook error:', err);
+      setError(err instanceof Error ? err : new Error(String(err)));
+      setLoading(false);
+    }
   }, []);
 
   return {
@@ -22,6 +36,7 @@ export const useFirebase = () => {
     storage,
     currentUser,
     loading,
+    error,
   };
 };
 
