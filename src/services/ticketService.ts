@@ -11,8 +11,9 @@ import {
   DocumentData
 } from 'firebase/firestore';
 import { ticketsCollection, db } from '../utils/firebase';
-import { Ticket, TicketStatus } from '../types';
+import { Ticket, TicketStatus, Event } from '../types';
 import { generateTicketId } from '../utils/helpers';
+import { fetchEvent } from './eventService';
 
 export const fetchTickets = async (eventId?: string): Promise<Ticket[]> => {
   try {
@@ -43,6 +44,7 @@ export const fetchTickets = async (eventId?: string): Promise<Ticket[]> => {
 
 export const fetchTicket = async (id: string): Promise<Ticket | null> => {
   try {
+    // First try to find by document ID
     const ticketDoc = await getDoc(doc(db, 'tickets', id));
     
     if (ticketDoc.exists()) {
@@ -50,6 +52,22 @@ export const fetchTicket = async (id: string): Promise<Ticket | null> => {
       return {
         id: ticketDoc.id,
         ...data
+      } as Ticket;
+    }
+    
+    // If not found, try to find by ticket ID field
+    const ticketsQuery = query(
+      ticketsCollection, 
+      where('id', '==', id)
+    );
+    
+    const snapshot = await getDocs(ticketsQuery);
+    
+    if (!snapshot.empty) {
+      const ticketDoc = snapshot.docs[0];
+      return {
+        id: ticketDoc.id,
+        ...ticketDoc.data()
       } as Ticket;
     }
     
@@ -136,3 +154,6 @@ export const updateTicketStatus = async (id: string, status: TicketStatus): Prom
     throw error;
   }
 };
+
+// Export fetchEvent here for use in TicketStatusPage
+export { fetchEvent };

@@ -1,6 +1,8 @@
 
 import React, { useState } from 'react';
 import { Search } from 'lucide-react';
+import { Input } from './ui/input';
+import { Button } from './ui/button';
 
 interface TicketStatusSearchProps {
   onSearch: (query: string, type: 'email' | 'ticketId') => void;
@@ -20,8 +22,8 @@ const TicketStatusSearch: React.FC<TicketStatusSearchProps> = ({ onSearch }) => 
   return (
     <div className="max-w-md mx-auto">
       <div className="mb-4">
-        <div className="flex gap-4 mb-3">
-          <label className="flex items-center">
+        <div className="flex gap-4 mb-3 justify-center">
+          <label className="flex items-center cursor-pointer">
             <input
               type="radio"
               name="searchType"
@@ -31,7 +33,7 @@ const TicketStatusSearch: React.FC<TicketStatusSearchProps> = ({ onSearch }) => 
             />
             Search by Email
           </label>
-          <label className="flex items-center">
+          <label className="flex items-center cursor-pointer">
             <input
               type="radio"
               name="searchType"
@@ -46,21 +48,23 @@ const TicketStatusSearch: React.FC<TicketStatusSearchProps> = ({ onSearch }) => 
           onSubmit={handleSubmit}
           className="relative"
         >
-          <input
+          <Input
             type={searchType === 'email' ? 'email' : 'text'}
             placeholder={searchType === 'email' ? 'Enter your email address' : 'Enter your ticket ID'}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="w-full bg-background border border-input rounded-md py-2 pl-4 pr-12 focus:outline-none focus:ring-2 focus:ring-primary"
+            className="w-full pr-12"
             required
           />
-          <button
+          <Button
             type="submit"
-            className="absolute right-2 top-1/2 -translate-y-1/2 bg-primary text-primary-foreground p-1 rounded-md"
+            className="absolute right-1 top-1/2 -translate-y-1/2 h-8 px-3"
+            size="sm"
             aria-label="Search"
           >
-            <Search size={20} />
-          </button>
+            <Search size={18} className="mr-1" />
+            Search
+          </Button>
         </form>
       </div>
     </div>

@@ -1,3 +1,4 @@
+
 import { format, parseISO } from 'date-fns';
 import { TicketStatus, EventStatus } from '../types';
 
@@ -15,7 +16,7 @@ export const formatDisplayDate = (dateString: string | Date | null | undefined):
     
     // If it's a timestamp from Firestore (object with seconds and nanoseconds)
     if (typeof dateString === 'object' && 'seconds' in dateString) {
-      const timestamp = new Date((dateString.seconds) * 1000);
+      const timestamp = new Date((dateString as any).seconds * 1000);
       return format(timestamp, 'EEEE, MMMM d, yyyy');
     }
     

@@ -1,11 +1,12 @@
 
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import { toast } from 'sonner';
 import SiteHeader from '../components/SiteHeader';
 import SiteFooter from '../components/SiteFooter';
 import TicketStatusSearch from '../components/TicketStatusSearch';
 import TicketStatusResult from '../components/TicketStatusResult';
-import { fetchTicket, fetchTicketByEmail, fetchEvent } from '../utils/api';
+import { fetchTicket, fetchTicketByEmail, fetchEvent } from '../services/ticketService';
 import { Ticket, Event } from '../types';
 
 const TicketStatusPage: React.FC = () => {
@@ -63,8 +64,13 @@ const TicketStatusPage: React.FC = () => {
       });
       
       setEvents(newEvents);
+
+      if (foundTickets.length === 0) {
+        toast.info('No tickets found with the provided information.');
+      }
     } catch (error) {
       console.error('Error searching tickets:', error);
+      toast.error('There was an error searching for your tickets. Please try again.');
     } finally {
       setIsLoading(false);
     }
