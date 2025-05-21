@@ -5,7 +5,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "./context/ThemeContext";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Helmet } from "react-helmet";
 
 // Public pages
 import HomePage from "./pages/HomePage";
@@ -33,6 +34,18 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
+        <Helmet>
+          <title>RNR Social Club - Sports Watch Parties in Eldoret</title>
+          <meta name="description" content="Join RNR Social Club for exciting sports watch parties in Eldoret. Bring your own food and drinks, we'll provide the venue and atmosphere!" />
+          <meta name="keywords" content="RNR Social Club, watch parties, sports events, Eldoret, F1, football, NBA, BYOB, BYOF" />
+          <meta property="og:title" content="RNR Social Club - Sports Watch Parties" />
+          <meta property="og:description" content="Join us for exciting sports watch parties in Eldoret. BYOB & BYOF policy applies." />
+          <meta property="og:type" content="website" />
+          <meta property="og:url" content="https://rnr-social.com" />
+          <meta property="og:image" content="/images/f1-event.jpg" />
+          <meta name="twitter:card" content="summary_large_image" />
+          <link rel="canonical" href="https://rnr-social.com" />
+        </Helmet>
         <TooltipProvider>
           <Toaster />
           <Sonner />

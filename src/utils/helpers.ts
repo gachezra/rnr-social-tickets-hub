@@ -45,16 +45,6 @@ export const getStatusText = (status: TicketStatus | EventStatus): { text: strin
   }
 };
 
-// Local storage helper functions
-export const saveToLocalStorage = (key: string, data: any): void => {
-  localStorage.setItem(key, JSON.stringify(data));
-};
-
-export const getFromLocalStorage = <T>(key: string, defaultValue: T): T => {
-  const data = localStorage.getItem(key);
-  return data ? JSON.parse(data) : defaultValue;
-};
-
 // Simple function for client-side "authentication"
 export const authenticate = (username: string, password: string, users: any[]): any | null => {
   return users.find(user => user.username === username && user.password === password) || null;
