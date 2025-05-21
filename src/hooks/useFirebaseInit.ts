@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth, db } from '../utils/firebase';
 import { initializeAdminUsers } from '../services/authService';
-import { getDocs, collection } from 'firebase/firestore';
+import { getDocs, collection, doc, setDoc } from 'firebase/firestore';
 import { events, tickets } from '../utils/mockData';
 
 export const useFirebaseInit = () => {

@@ -9,7 +9,8 @@ import {
   updateDoc, 
   deleteDoc,
   serverTimestamp,
-  orderBy
+  orderBy,
+  DocumentData
 } from 'firebase/firestore';
 import { eventsCollection, db } from '../utils/firebase';
 import { Event, EventStatus } from '../types';
@@ -29,10 +30,13 @@ export const fetchEvents = async (status?: EventStatus): Promise<Event[]> => {
     }
 
     const snapshot = await getDocs(eventsQuery);
-    return snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    } as Event));
+    return snapshot.docs.map(doc => {
+      const data = doc.data() as DocumentData;
+      return {
+        id: doc.id,
+        ...data
+      } as Event;
+    });
   } catch (error) {
     console.error('Error fetching events:', error);
     throw error;
@@ -44,9 +48,10 @@ export const fetchEvent = async (id: string): Promise<Event | null> => {
     const eventDoc = await getDoc(doc(db, 'events', id));
     
     if (eventDoc.exists()) {
+      const data = eventDoc.data() as DocumentData;
       return {
         id: eventDoc.id,
-        ...eventDoc.data()
+        ...data
       } as Event;
     }
     
@@ -97,10 +102,11 @@ export const updateEvent = async (id: string, eventData: Partial<Event>): Promis
     
     // Get the updated document
     const updatedSnapshot = await getDoc(eventRef);
+    const data = updatedSnapshot.data() as DocumentData;
     
     return {
       id,
-      ...updatedSnapshot.data()
+      ...data
     } as Event;
   } catch (error) {
     console.error('Error updating event:', error);

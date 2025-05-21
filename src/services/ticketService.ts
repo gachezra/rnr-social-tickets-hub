@@ -7,7 +7,8 @@ import {
   doc, 
   addDoc, 
   updateDoc,
-  serverTimestamp
+  serverTimestamp,
+  DocumentData
 } from 'firebase/firestore';
 import { ticketsCollection, db } from '../utils/firebase';
 import { Ticket, TicketStatus } from '../types';
@@ -27,10 +28,13 @@ export const fetchTickets = async (eventId?: string): Promise<Ticket[]> => {
     }
 
     const snapshot = await getDocs(ticketsQuery);
-    return snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    } as Ticket));
+    return snapshot.docs.map(doc => {
+      const data = doc.data() as DocumentData;
+      return {
+        id: doc.id,
+        ...data
+      } as Ticket;
+    });
   } catch (error) {
     console.error('Error fetching tickets:', error);
     throw error;
@@ -42,9 +46,10 @@ export const fetchTicket = async (id: string): Promise<Ticket | null> => {
     const ticketDoc = await getDoc(doc(db, 'tickets', id));
     
     if (ticketDoc.exists()) {
+      const data = ticketDoc.data() as DocumentData;
       return {
         id: ticketDoc.id,
-        ...ticketDoc.data()
+        ...data
       } as Ticket;
     }
     
