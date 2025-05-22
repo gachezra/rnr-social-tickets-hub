@@ -73,8 +73,8 @@ const App = () => {
                   path="/ticket-status/:ticketId" 
                   element={<Navigate to={(location) => {
                     const ticketId = location.pathname.split('/').pop();
-                    return `/ticket-status?ticketId=${ticketId}`;
-                  }} replace />} 
+                    return `/ticket-status?ticketId=${ticketId || ''}`;
+                  }} />} 
                 />
                 
                 {/* Admin Routes */}

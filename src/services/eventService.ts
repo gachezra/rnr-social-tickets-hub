@@ -1,4 +1,3 @@
-
 import { 
   query, 
   where, 
@@ -12,23 +11,31 @@ import {
   orderBy,
   limit,
   DocumentData,
-  Timestamp
+  Timestamp,
+  collection,
+  QuerySnapshot
 } from 'firebase/firestore';
 import { eventsCollection, db } from '../utils/firebase';
 import { Event, EventStatus } from '../types';
 
 export const fetchEvents = async (status?: EventStatus): Promise<Event[]> => {
   try {
+    // Enhanced debugging
+    console.log(`Starting fetchEvents with status: ${status || 'all'}`);
+    console.log('Using eventsCollection reference:', eventsCollection);
+    
     let eventsQuery;
     
     if (status) {
+      console.log(`Creating query with status filter: ${status}`);
       eventsQuery = query(
         eventsCollection, 
         where('status', '==', status),
         orderBy('date', 'asc'),
-        limit(50) // Add a reasonable limit
+        limit(50)
       );
     } else {
+      console.log('Creating query without status filter');
       eventsQuery = query(
         eventsCollection, 
         orderBy('date', 'asc'),
@@ -37,7 +44,19 @@ export const fetchEvents = async (status?: EventStatus): Promise<Event[]> => {
     }
 
     console.log(`Fetching events with status: ${status || 'all'}`);
+    
+    // Get a raw snapshot - alternative approach for debugging
+    const rawCollection = collection(db, 'events');
+    const rawSnapshot = await getDocs(rawCollection);
+    console.log(`Raw collection has ${rawSnapshot.docs.length} documents`);
+    if (rawSnapshot.docs.length > 0) {
+      console.log('First raw document:', rawSnapshot.docs[0].id, rawSnapshot.docs[0].data());
+    }
+    
+    // Get filtered snapshot
     const snapshot = await getDocs(eventsQuery);
+    
+    console.log(`Query snapshot received, empty: ${snapshot.empty}, size: ${snapshot.size}`);
     
     if (snapshot.empty) {
       console.log('No events found in snapshot');
@@ -46,9 +65,15 @@ export const fetchEvents = async (status?: EventStatus): Promise<Event[]> => {
       console.log(`Found ${snapshot.docs.length} events in snapshot`);
     }
     
+    // Log all events raw data for debugging
+    snapshot.docs.forEach(doc => {
+      console.log(`Raw event data for ${doc.id}:`, doc.data());
+    });
+    
     const events = snapshot.docs.map(doc => {
       const data = doc.data() as DocumentData;
       console.log(`Processing event: ${doc.id}`, data);
+      console.log(`Event status: ${data.status}, type: ${typeof data.status}`);
       
       // Convert Firestore timestamp to ISO string if needed
       const formattedData: DocumentData = { ...data };

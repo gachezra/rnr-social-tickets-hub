@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Calendar, MapPin, Clock } from 'lucide-react';
@@ -10,43 +9,62 @@ import EventSearchBar from '../components/EventSearchBar';
 import { searchEvents } from '../utils/api';
 import { Event } from '../types';
 import { fetchEvents } from '../services/eventService';
+import { useToast } from '@/components/ui/use-toast';
 
 const HomePage: React.FC = () => {
   const [searchResults, setSearchResults] = useState<Event[] | null>(null);
+  const { toast } = useToast();
 
-  // Use React Query to fetch upcoming events
+  // Use React Query to fetch upcoming events with better error handling
   const { 
     data: upcomingEvents = [], 
     isLoading, 
-    error 
+    error,
+    refetch,
+    isFetched 
   } = useQuery({
     queryKey: ['upcomingEvents'],
     queryFn: async () => {
       try {
         console.log('Starting to fetch upcoming events...');
+        // Attempt to get all events first if filtering isn't working
+        const allEvents = await fetchEvents();
+        console.log('All events (unfiltered):', allEvents);
+        
+        // Then try with the filter
         const events = await fetchEvents('upcoming');
         console.log('Fetched upcoming events (raw):', events);
         console.log('Number of events fetched:', events.length);
         console.log('First event details (if any):', events.length > 0 ? events[0] : 'No events');
-        return events;
+        return events.length > 0 ? events : allEvents;
       } catch (err) {
         console.error('Error fetching upcoming events:', err);
         throw err;
       }
-    }
+    },
+    staleTime: 60000, // 1 minute
   });
 
   useEffect(() => {
     if (error) {
       console.error('Error loading events:', error);
+      toast({
+        title: "Error loading events",
+        description: "There was a problem loading events. Please try again.",
+        variant: "destructive"
+      });
     }
-  }, [error]);
+  }, [error, toast]);
 
   // Additional debugging useEffect
   useEffect(() => {
     console.log('upcomingEvents in state:', upcomingEvents);
     console.log('upcomingEvents length:', upcomingEvents.length);
-  }, [upcomingEvents]);
+    
+    if (isFetched && upcomingEvents.length === 0) {
+      console.log('Events fetched but none found. This could indicate an issue with the database or query.');
+    }
+  }, [upcomingEvents, isFetched]);
 
   const handleSearch = async (query: string) => {
     if (!query.trim()) {
