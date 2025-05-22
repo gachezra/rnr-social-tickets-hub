@@ -7,8 +7,9 @@ import SiteHeader from '../components/SiteHeader';
 import SiteFooter from '../components/SiteFooter';
 import EventCard from '../components/EventCard';
 import EventSearchBar from '../components/EventSearchBar';
-import { fetchEvents, searchEvents } from '../utils/api';
+import { searchEvents } from '../utils/api';
 import { Event } from '../types';
+import { fetchEvents } from '../services/eventService';
 
 const HomePage: React.FC = () => {
   const [searchResults, setSearchResults] = useState<Event[] | null>(null);
@@ -23,7 +24,7 @@ const HomePage: React.FC = () => {
     queryFn: async () => {
       try {
         const events = await fetchEvents('upcoming');
-        console.log('Fetched upcoming events:', events.length);
+        console.log('Fetched upcoming events:', events);
         return events;
       } catch (err) {
         console.error('Error fetching upcoming events:', err);
@@ -53,6 +54,7 @@ const HomePage: React.FC = () => {
   };
 
   const displayedEvents = searchResults ?? upcomingEvents;
+  console.log('Displaying events:', displayedEvents);
 
   return (
     <>

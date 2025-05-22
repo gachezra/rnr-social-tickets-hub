@@ -1,4 +1,3 @@
-
 import { 
   query, 
   where, 
@@ -11,7 +10,8 @@ import {
   serverTimestamp,
   orderBy,
   limit,
-  DocumentData
+  DocumentData,
+  Timestamp
 } from 'firebase/firestore';
 import { eventsCollection, db } from '../utils/firebase';
 import { Event, EventStatus } from '../types';
@@ -37,15 +37,44 @@ export const fetchEvents = async (status?: EventStatus): Promise<Event[]> => {
 
     console.log(`Fetching events with status: ${status || 'all'}`);
     const snapshot = await getDocs(eventsQuery);
+    
+    if (snapshot.empty) {
+      console.log('No events found');
+    } else {
+      console.log(`Found ${snapshot.docs.length} events`);
+    }
+    
     const events = snapshot.docs.map(doc => {
-      const data = doc.data() as DocumentData;
+      const data = doc.data();
+      // Convert Firestore timestamp to ISO string if needed
+      const formattedData: any = { ...data };
+      
+      if (data.createdAt && typeof data.createdAt !== 'string') {
+        formattedData.createdAt = data.createdAt instanceof Timestamp 
+          ? data.createdAt.toDate().toISOString() 
+          : new Date().toISOString();
+      }
+      
+      if (data.updatedAt && typeof data.updatedAt !== 'string') {
+        formattedData.updatedAt = data.updatedAt instanceof Timestamp 
+          ? data.updatedAt.toDate().toISOString() 
+          : new Date().toISOString();
+      }
+
+      // Handle date field if it's a Timestamp
+      if (data.date && typeof data.date !== 'string') {
+        formattedData.date = data.date instanceof Timestamp 
+          ? data.date.toDate().toISOString().split('T')[0] 
+          : data.date;
+      }
+      
       return {
         id: doc.id,
-        ...data
+        ...formattedData
       } as Event;
     });
     
-    console.log(`Found ${events.length} events`);
+    console.log(`Processed ${events.length} events:`, events);
     return events;
   } catch (error) {
     console.error('Error fetching events:', error);
