@@ -47,8 +47,6 @@ const TicketStatusPage: React.FC = () => {
         foundTickets = await fetchTicketByEmail(query);
       }
 
-      console.log("Ticket deets: ", foundTickets);
-
       setTickets(foundTickets);
 
       // Fetch events for all found tickets
@@ -87,10 +85,10 @@ const TicketStatusPage: React.FC = () => {
   };
 
   return (
-    <>
+    <div className="min-h-screen flex flex-col">
       <SiteHeader />
 
-      <main className="py-12">
+      <main className="flex-1 py-12">
         <div className="container-custom">
           <div className="max-w-3xl mx-auto">
             <div className="text-center mb-8">
@@ -149,7 +147,7 @@ const TicketStatusPage: React.FC = () => {
       </main>
 
       <SiteFooter />
-    </>
+    </div>
   );
 };
 

@@ -52,10 +52,7 @@ const AboutPage: React.FC = () => {
                   src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3989.6710108766183!2d35.38117397590879!3d0.4923542995028286!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x17811d002ba8866b%3A0x8756d8a8c405e2e!2sRnR%20Social%20lab!5e0!3m2!1sen!2ske!4v1747933523852!5m2!1sen!2ske"
                   width="600"
                   height="450"
-                  style="border:0;"
-                  allowfullscreen=""
                   loading="lazy"
-                  referrerpolicy="no-referrer-when-downgrade"
                 ></iframe>
               </div>
             </div>
@@ -168,7 +165,11 @@ const AboutPage: React.FC = () => {
                     <Mail size={24} />
                   </div>
                   <h3 className="text-xl font-bold mb-2">Email</h3>
-                  <p>info@rnrsociallab.com</p>
+                  <p>
+                    <a href="mailto::info@rnrsociallab.com">
+                      info@rnrsociallab.com
+                    </a>
+                  </p>
                 </div>
               </div>
             </div>

@@ -6,9 +6,7 @@ import { initializeAdminUsers } from './services/authService'
 
 // Initialize admin users on app start
 initializeAdminUsers()
-  .then(() => {
-    console.log('Firebase and admin users initialized');
-    
+  .then(() => {    
     // Make sure to wait for DOM to be ready before rendering
     const container = document.getElementById("root")
     if (container) {

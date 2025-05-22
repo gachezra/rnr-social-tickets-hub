@@ -26,20 +26,15 @@ const HomePage: React.FC = () => {
     queryKey: ["upcomingEvents"],
     queryFn: async () => {
       try {
-        console.log("Starting to fetch upcoming events...");
-
         // First try to get events with "upcoming" status
         const upcomingEvents = await fetchEvents("upcoming");
-        console.log("Fetched upcoming events:", upcomingEvents);
 
         if (upcomingEvents.length > 0) {
           return upcomingEvents;
         }
 
         // If no upcoming events, try all events
-        console.log("No upcoming events found, fetching all events...");
         const allEvents = await fetchEvents();
-        console.log("All events fetched:", allEvents);
 
         // Filter client-side if needed (in case status filtering isn't working in Firestore)
         const clientFilteredEvents = allEvents.filter((event) => {
@@ -49,8 +44,6 @@ const HomePage: React.FC = () => {
 
           return eventDate >= today && event.status === "upcoming";
         });
-
-        console.log("Client-filtered upcoming events:", clientFilteredEvents);
 
         // Return client-filtered events if any, otherwise return all events
         return clientFilteredEvents.length > 0
@@ -74,18 +67,6 @@ const HomePage: React.FC = () => {
       });
     }
   }, [error, toast]);
-
-  // Additional debugging useEffect
-  useEffect(() => {
-    console.log("upcomingEvents in state:", upcomingEvents);
-    console.log("upcomingEvents length:", upcomingEvents.length);
-
-    if (isFetched && upcomingEvents.length === 0) {
-      console.log(
-        "Events fetched but none found. This could indicate an issue with the database or query."
-      );
-    }
-  }, [upcomingEvents, isFetched]);
 
   const handleSearch = async (query: string) => {
     if (!query.trim()) {

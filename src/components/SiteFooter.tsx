@@ -143,7 +143,14 @@ const SiteFooter: React.FC = () => {
             <ul className="space-y-3">
               <li className="flex items-start gap-2">
                 <MapPin size={20} className="text-primary flex-shrink-0 mt-1" />
-                <span>RNR Social Lab, Eldoret, Kenya</span>
+                <span>
+                  <a
+                    href="https://maps.app.goo.gl/qeVTYPeTMsq1Rg7P8"
+                    target="_blank"
+                  >
+                    RNR Social Lab, Eldoret, Kenya
+                  </a>
+                </span>
               </li>
               <li className="flex items-center gap-2">
                 <Phone size={20} className="text-primary flex-shrink-0" />
@@ -151,7 +158,11 @@ const SiteFooter: React.FC = () => {
               </li>
               <li className="flex items-center gap-2">
                 <Mail size={20} className="text-primary flex-shrink-0" />
-                <span>info@rnrsociallab.com</span>
+                <span>
+                  <a href="mailto::info@rnrsociallab.com">
+                    info@rnrsociallab.com
+                  </a>
+                </span>
               </li>
             </ul>
           </div>
