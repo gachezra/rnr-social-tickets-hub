@@ -1,43 +1,39 @@
-
-import { 
-  query, 
-  where, 
-  getDocs, 
-  getDoc, 
-  doc, 
-  addDoc, 
+import {
+  query,
+  where,
+  getDocs,
+  getDoc,
+  doc,
+  addDoc,
   updateDoc,
   serverTimestamp,
-  DocumentData
-} from 'firebase/firestore';
-import { ticketsCollection, db } from '../utils/firebase';
-import { Ticket, TicketStatus, Event } from '../types';
-import { generateTicketId } from '../utils/helpers';
-import { fetchEvent } from './eventService';
+  DocumentData,
+} from "firebase/firestore";
+import { ticketsCollection, db } from "../utils/firebase";
+import { Ticket, TicketStatus, Event } from "../types";
+import { generateTicketId } from "../utils/helpers";
+import { fetchEvent } from "./eventService";
 
 export const fetchTickets = async (eventId?: string): Promise<Ticket[]> => {
   try {
     let ticketsQuery;
-    
+
     if (eventId) {
-      ticketsQuery = query(
-        ticketsCollection, 
-        where('eventId', '==', eventId)
-      );
+      ticketsQuery = query(ticketsCollection, where("eventId", "==", eventId));
     } else {
       ticketsQuery = ticketsCollection;
     }
 
     const snapshot = await getDocs(ticketsQuery);
-    return snapshot.docs.map(doc => {
+    return snapshot.docs.map((doc) => {
       const data = doc.data() as DocumentData;
       return {
-        id: doc.id,
-        ...data
+        tId: doc.id, // Firestore document ID
+        ...data,
       } as Ticket;
     });
   } catch (error) {
-    console.error('Error fetching tickets:', error);
+    console.error("Error fetching tickets:", error);
     throw error;
   }
 };
@@ -45,35 +41,33 @@ export const fetchTickets = async (eventId?: string): Promise<Ticket[]> => {
 export const fetchTicket = async (id: string): Promise<Ticket | null> => {
   try {
     // First try to find by document ID
-    const ticketDoc = await getDoc(doc(db, 'tickets', id));
-    
+    const ticketDoc = await getDoc(doc(db, "tickets", id));
+
     if (ticketDoc.exists()) {
       const data = ticketDoc.data() as DocumentData;
       return {
-        id: ticketDoc.id,
-        ...data
+        tId: ticketDoc.id, // Firestore document ID
+        ...data,
       } as Ticket;
     }
-    
+
     // If not found, try to find by ticket ID field
-    const ticketsQuery = query(
-      ticketsCollection, 
-      where('id', '==', id)
-    );
-    
+    const ticketsQuery = query(ticketsCollection, where("id", "==", id));
+
     const snapshot = await getDocs(ticketsQuery);
-    
+
     if (!snapshot.empty) {
       const ticketDoc = snapshot.docs[0];
+      const data = ticketDoc.data();
       return {
-        id: ticketDoc.id,
-        ...ticketDoc.data()
+        tId: ticketDoc.id, // Firestore document ID
+        ...data,
       } as Ticket;
     }
-    
+
     return null;
   } catch (error) {
-    console.error('Error fetching ticket:', error);
+    console.error("Error fetching ticket:", error);
     throw error;
   }
 };
@@ -81,76 +75,82 @@ export const fetchTicket = async (id: string): Promise<Ticket | null> => {
 export const fetchTicketByEmail = async (email: string): Promise<Ticket[]> => {
   try {
     const ticketsQuery = query(
-      ticketsCollection, 
-      where('email', '==', email.toLowerCase())
+      ticketsCollection,
+      where("email", "==", email.toLowerCase())
     );
-    
+
     const snapshot = await getDocs(ticketsQuery);
-    return snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    } as Ticket));
+    return snapshot.docs.map((doc) => {
+      const data = doc.data();
+      return {
+        tId: doc.id, // Firestore document ID
+        ...data,
+      } as Ticket;
+    });
   } catch (error) {
-    console.error('Error fetching tickets by email:', error);
+    console.error("Error fetching tickets by email:", error);
     throw error;
   }
 };
 
-export const createTicket = async (ticketData: Omit<Ticket, 'id' | 'status' | 'createdAt' | 'updatedAt'>): Promise<Ticket> => {
+export const createTicket = async (
+  ticketData: Omit<Ticket, "id" | "status" | "createdAt" | "updatedAt">
+): Promise<Ticket> => {
   try {
     const ticketId = generateTicketId();
-    
+
     const newTicketData = {
       ...ticketData,
       email: ticketData.email.toLowerCase(),
       id: ticketId,
-      status: 'pending' as TicketStatus,
+      status: "pending" as TicketStatus,
       createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
+      updatedAt: serverTimestamp(),
     };
-    
-    await addDoc(ticketsCollection, newTicketData);
-    
+
+    const docRef = await addDoc(ticketsCollection, newTicketData);
+
     return {
+      tId: docRef.id, // Firestore document ID
       ...newTicketData,
       createdAt: new Date().toISOString(), // For immediate use in client
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     } as Ticket;
   } catch (error) {
-    console.error('Error creating ticket:', error);
+    console.error("Error creating ticket:", error);
     throw error;
   }
 };
 
-export const updateTicketStatus = async (id: string, status: TicketStatus): Promise<Ticket | null> => {
+export const updateTicketStatus = async (
+  id: string,
+  status: TicketStatus
+): Promise<Ticket | null> => {
   try {
-    const ticketsQuery = query(
-      ticketsCollection, 
-      where('id', '==', id)
-    );
-    
+    const ticketsQuery = query(ticketsCollection, where("id", "==", id));
+
     const snapshot = await getDocs(ticketsQuery);
-    
+
     if (snapshot.empty) {
       return null;
     }
-    
+
     const ticketDoc = snapshot.docs[0];
-    
+
     await updateDoc(ticketDoc.ref, {
       status,
-      updatedAt: serverTimestamp()
+      updatedAt: serverTimestamp(),
     });
-    
+
     // Get the updated document
     const updatedSnapshot = await getDoc(ticketDoc.ref);
-    
+
     return {
-      id: ticketDoc.id,
-      ...updatedSnapshot.data()
+      tId: ticketDoc.id, // Firestore document ID
+      ...updatedSnapshot.data(),
     } as Ticket;
   } catch (error) {
-    console.error('Error updating ticket status:', error);
+    console.error("Error updating ticket status:", error);
     throw error;
   }
 };

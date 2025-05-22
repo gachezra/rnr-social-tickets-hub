@@ -12,6 +12,8 @@ interface TicketStatusResultProps {
 const TicketStatusResult: React.FC<TicketStatusResultProps> = ({ ticket, event }) => {
   const statusInfo = getStatusText(ticket.status);
 
+  const paymentLink = `https://rnr-pay-1ybi.vercel.app/?amount=${(event.price * ticket.quantity)}&ticketId=${ticket.tId}&phone=${ticket.mpesaPhone}`;
+
   return (
     <div className="bg-card border border-border rounded-lg overflow-hidden animate-fadeIn">
       <div className="bg-secondary p-4 border-b border-border">
@@ -78,6 +80,15 @@ const TicketStatusResult: React.FC<TicketStatusResultProps> = ({ ticket, event }
             <p>Please complete your payment via M-Pesa to confirm your reservation.</p>
             <p className="mt-1">M-Pesa Pay Bill: <span className="font-mono">123456</span></p>
             <p>Account Number: <span className="font-mono">{ticket.id}</span></p>
+            <p>Or</p>
+            <a
+              href={paymentLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 inline-block px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
+            >
+              Pay Now
+            </a>
           </div>
         )}
       </div>

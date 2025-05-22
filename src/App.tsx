@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -29,25 +28,40 @@ import NotFound from "./pages/NotFound";
 
 const App = () => {
   // Create a new QueryClient for each component instance
-  const [queryClient] = useState(() => new QueryClient({
-    defaultOptions: {
-      queries: {
-        refetchOnWindowFocus: false,
-        retry: 1,
-      },
-    },
-  }));
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            refetchOnWindowFocus: false,
+            retry: 1,
+          },
+        },
+      })
+  );
 
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <HelmetProvider>
           <Helmet>
-            <title>RNR Social Club - Sports Watch Parties in Eldoret</title>
-            <meta name="description" content="Join RNR Social Club for exciting sports watch parties in Eldoret. Bring your own food and drinks, we'll provide the venue and atmosphere!" />
-            <meta name="keywords" content="RNR Social Club, watch parties, sports events, Eldoret, F1, football, NBA, BYOB, BYOF" />
-            <meta property="og:title" content="RNR Social Club - Sports Watch Parties" />
-            <meta property="og:description" content="Join us for exciting sports watch parties in Eldoret. BYOB & BYOF policy applies." />
+            <title>RNR Social Lab - Social Experiences</title>
+            <meta
+              name="description"
+              content="Join RNR Social Lab for exciting sports watch parties in Eldoret. Bring your own food and drinks, we'll provide the venue and atmosphere!"
+            />
+            <meta
+              name="keywords"
+              content="RNR Social Lab, watch parties, sports events, Eldoret, F1, football, NBA, BYOB, BYOF"
+            />
+            <meta
+              property="og:title"
+              content="RNR Social Lab - Social Experiences"
+            />
+            <meta
+              property="og:description"
+              content="Join us for exciting sports watch parties in Eldoret. BYOB & BYOF policy applies."
+            />
             <meta property="og:type" content="website" />
             <meta property="og:url" content="https://rnr-social.com" />
             <meta property="og:image" content="/images/f1-event.jpg" />
@@ -67,16 +81,20 @@ const App = () => {
                 <Route path="/about" element={<AboutPage />} />
                 <Route path="/terms" element={<TermsPage />} />
                 <Route path="/privacy" element={<PrivacyPage />} />
-                
+
                 {/* Redirect for old URL format to ensure backward compatibility */}
-                <Route 
-                  path="/ticket-status/:ticketId" 
-                  element={<Navigate to={(location) => {
-                    const ticketId = location.pathname.split('/').pop();
-                    return `/ticket-status?ticketId=${ticketId || ''}`;
-                  }} />} 
+                <Route
+                  path="/ticket-status/:ticketId"
+                  element={
+                    <Navigate
+                      to={(location) => {
+                        const ticketId = location.pathname.split("/").pop();
+                        return `/ticket-status?ticketId=${ticketId || ""}`;
+                      }}
+                    />
+                  }
                 />
-                
+
                 {/* Admin Routes */}
                 <Route path="/admin-panel" element={<AdminLayout />}>
                   <Route index element={<AdminDashboard />} />
@@ -85,7 +103,7 @@ const App = () => {
                   <Route path="check-in" element={<AdminCheckIn />} />
                   <Route path="settings" element={<AdminSettings />} />
                 </Route>
-                
+
                 {/* Catch-all route for 404 */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

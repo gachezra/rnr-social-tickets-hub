@@ -1,6 +1,5 @@
-
-export type EventStatus = 'upcoming' | 'ongoing' | 'past' | 'cancelled';
-export type TicketStatus = 'pending' | 'confirmed' | 'checked-in' | 'cancelled';
+export type EventStatus = "upcoming" | "ongoing" | "past" | "cancelled";
+export type TicketStatus = "pending" | "confirmed" | "checked-in" | "cancelled";
 
 export interface Event {
   id: string;
@@ -13,6 +12,7 @@ export interface Event {
   location: string;
   imageUrl: string;
   price: number;
+  byob: boolean;
   maxCapacity: number;
   status: EventStatus;
   createdAt: string;
@@ -28,6 +28,7 @@ export interface Ticket {
   status: TicketStatus;
   createdAt: string;
   updatedAt: string;
+  tId: string;
 }
 
 export interface User {
@@ -35,5 +36,5 @@ export interface User {
   username: string;
   password: string; // this would be hashed in a real application
   name: string;
-  role: 'admin' | 'staff';
+  role: "admin" | "staff";
 }

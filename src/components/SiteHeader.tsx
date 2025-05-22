@@ -1,8 +1,7 @@
-
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
-import { useTheme } from '../context/ThemeContext';
+import React from "react";
+import { Link, useLocation } from "react-router-dom";
+import { Menu, X } from "lucide-react";
+import { useTheme } from "../context/ThemeContext";
 
 const SiteHeader: React.FC = () => {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -26,42 +25,48 @@ const SiteHeader: React.FC = () => {
       <div className="container-custom py-4">
         <div className="flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2" onClick={closeMenu}>
-            <span className="text-primary font-heading text-2xl font-bold">RNR</span>
-            <span className="font-heading text-xl font-medium">
-              Social Club
+            <span className="text-primary font-heading text-2xl font-bold">
+              RNR
             </span>
+            <span className="font-heading text-xl font-medium">Social Lab</span>
           </Link>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-6">
-            <Link 
-              to="/" 
-              className={`nav-link ${isActive('/') ? 'active' : ''}`}
+            <Link
+              to="/"
+              className={`nav-link ${isActive("/") ? "active" : ""}`}
             >
               Home
             </Link>
-            <Link 
-              to="/events" 
-              className={`nav-link ${isActive('/events') || location.pathname.startsWith('/events/') ? 'active' : ''}`}
+            <Link
+              to="/events"
+              className={`nav-link ${
+                isActive("/events") || location.pathname.startsWith("/events/")
+                  ? "active"
+                  : ""
+              }`}
             >
               Events
             </Link>
-            <Link 
-              to="/ticket-status" 
-              className={`nav-link ${isActive('/ticket-status') ? 'active' : ''}`}
+            <Link
+              to="/ticket-status"
+              className={`nav-link ${
+                isActive("/ticket-status") ? "active" : ""
+              }`}
             >
               Ticket Status
             </Link>
-            <Link 
-              to="/about" 
-              className={`nav-link ${isActive('/about') ? 'active' : ''}`}
+            <Link
+              to="/about"
+              className={`nav-link ${isActive("/about") ? "active" : ""}`}
             >
-              About 
+              About
             </Link>
           </nav>
 
           {/* Mobile Menu Button */}
-          <button 
+          <button
             onClick={toggleMenu}
             className="md:hidden flex items-center text-foreground"
             aria-label="Toggle Menu"
@@ -76,13 +81,19 @@ const SiteHeader: React.FC = () => {
         <div className="fixed inset-0 bg-background/95 backdrop-blur-sm z-50 md:hidden">
           <div className="container py-4">
             <div className="flex justify-between items-center mb-8">
-              <Link to="/" className="flex items-center gap-2" onClick={closeMenu}>
-                <span className="text-primary font-heading text-2xl font-bold">RNR</span>
+              <Link
+                to="/"
+                className="flex items-center gap-2"
+                onClick={closeMenu}
+              >
+                <span className="text-primary font-heading text-2xl font-bold">
+                  RNR
+                </span>
                 <span className="font-heading text-xl font-medium">
-                  Social Club
+                  Social Lab
                 </span>
               </Link>
-              <button 
+              <button
                 onClick={closeMenu}
                 className="text-foreground"
                 aria-label="Close Menu"
@@ -91,30 +102,37 @@ const SiteHeader: React.FC = () => {
               </button>
             </div>
             <nav className="flex flex-col items-center gap-6 text-xl">
-              <Link 
-                to="/" 
-                className={`nav-link ${isActive('/') ? 'active' : ''}`}
+              <Link
+                to="/"
+                className={`nav-link ${isActive("/") ? "active" : ""}`}
                 onClick={closeMenu}
               >
                 Home
               </Link>
-              <Link 
-                to="/events" 
-                className={`nav-link ${isActive('/events') || location.pathname.startsWith('/events/') ? 'active' : ''}`}
+              <Link
+                to="/events"
+                className={`nav-link ${
+                  isActive("/events") ||
+                  location.pathname.startsWith("/events/")
+                    ? "active"
+                    : ""
+                }`}
                 onClick={closeMenu}
               >
                 Events
               </Link>
-              <Link 
-                to="/ticket-status" 
-                className={`nav-link ${isActive('/ticket-status') ? 'active' : ''}`}
+              <Link
+                to="/ticket-status"
+                className={`nav-link ${
+                  isActive("/ticket-status") ? "active" : ""
+                }`}
                 onClick={closeMenu}
               >
                 Ticket Status
               </Link>
-              <Link 
-                to="/about" 
-                className={`nav-link ${isActive('/about') ? 'active' : ''}`}
+              <Link
+                to="/about"
+                className={`nav-link ${isActive("/about") ? "active" : ""}`}
                 onClick={closeMenu}
               >
                 About

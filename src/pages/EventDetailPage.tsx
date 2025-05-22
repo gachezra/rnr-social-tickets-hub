@@ -103,8 +103,8 @@ const EventDetailPage: React.FC = () => {
       
       <main>
         {/* Event Banner */}
-        <div className="relative h-80 md:h-96 lg:h-[500px] overflow-hidden">
-          <img 
+        <div className="relative h-60 md:h-76 lg:h-[400px] overflow-hidden">
+          <img
             src={event.imageUrl} 
             alt={event.title} 
             className="w-full h-full object-cover"
@@ -112,8 +112,21 @@ const EventDetailPage: React.FC = () => {
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/85 to-background/50" />
         </div>
         
-        <div className="container-custom -mt-20 relative z-10">
+        {/* Event Poster */}
+        <div className="container-custom mb-6 relative z-10 mt-[-15rem]">
+          <div className="flex justify-center">
+            <img 
+              src={event.imageUrl} 
+              alt={`${event.title} Poster`} 
+              className="h-full w-auto rounded-lg border border-border shadow-md object-cover max-h-[500px] sm:max-h-[600px] md:max-h-[650px]"
+            />
+          </div>
+        </div>
+
+        <div className="container-custom -mt-200 relative z-10">
           <div className="bg-card border border-border rounded-lg shadow-lg overflow-hidden">
+
+
             <div className="p-6 md:p-8">
               <div className="flex flex-wrap items-center gap-3 mb-4">
                 <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusInfo.colorClass}`}>
