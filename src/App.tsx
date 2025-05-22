@@ -69,9 +69,13 @@ const App = () => {
                 <Route path="/privacy" element={<PrivacyPage />} />
                 
                 {/* Redirect for old URL format to ensure backward compatibility */}
-                <Route path="/ticket-status/:ticketId" element={
-                  <Navigate to={params => `/ticket-status?ticketId=${params.ticketId}`} replace />
-                } />
+                <Route 
+                  path="/ticket-status/:ticketId" 
+                  element={<Navigate to={(location) => {
+                    const ticketId = location.pathname.split('/').pop();
+                    return `/ticket-status?ticketId=${ticketId}`;
+                  }} replace />} 
+                />
                 
                 {/* Admin Routes */}
                 <Route path="/admin-panel" element={<AdminLayout />}>

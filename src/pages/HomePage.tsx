@@ -23,8 +23,11 @@ const HomePage: React.FC = () => {
     queryKey: ['upcomingEvents'],
     queryFn: async () => {
       try {
+        console.log('Starting to fetch upcoming events...');
         const events = await fetchEvents('upcoming');
-        console.log('Fetched upcoming events:', events);
+        console.log('Fetched upcoming events (raw):', events);
+        console.log('Number of events fetched:', events.length);
+        console.log('First event details (if any):', events.length > 0 ? events[0] : 'No events');
         return events;
       } catch (err) {
         console.error('Error fetching upcoming events:', err);
@@ -38,6 +41,12 @@ const HomePage: React.FC = () => {
       console.error('Error loading events:', error);
     }
   }, [error]);
+
+  // Additional debugging useEffect
+  useEffect(() => {
+    console.log('upcomingEvents in state:', upcomingEvents);
+    console.log('upcomingEvents length:', upcomingEvents.length);
+  }, [upcomingEvents]);
 
   const handleSearch = async (query: string) => {
     if (!query.trim()) {
@@ -54,7 +63,8 @@ const HomePage: React.FC = () => {
   };
 
   const displayedEvents = searchResults ?? upcomingEvents;
-  console.log('Displaying events:', displayedEvents);
+  console.log('Displaying events final:', displayedEvents);
+  console.log('Displaying events length:', displayedEvents.length);
 
   return (
     <>

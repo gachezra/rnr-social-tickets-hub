@@ -1,3 +1,4 @@
+
 import { 
   query, 
   where, 
@@ -39,15 +40,18 @@ export const fetchEvents = async (status?: EventStatus): Promise<Event[]> => {
     const snapshot = await getDocs(eventsQuery);
     
     if (snapshot.empty) {
-      console.log('No events found');
+      console.log('No events found in snapshot');
+      return [];
     } else {
-      console.log(`Found ${snapshot.docs.length} events`);
+      console.log(`Found ${snapshot.docs.length} events in snapshot`);
     }
     
     const events = snapshot.docs.map(doc => {
-      const data = doc.data();
+      const data = doc.data() as DocumentData;
+      console.log(`Processing event: ${doc.id}`, data);
+      
       // Convert Firestore timestamp to ISO string if needed
-      const formattedData: any = { ...data };
+      const formattedData: DocumentData = { ...data };
       
       if (data.createdAt && typeof data.createdAt !== 'string') {
         formattedData.createdAt = data.createdAt instanceof Timestamp 
@@ -68,13 +72,16 @@ export const fetchEvents = async (status?: EventStatus): Promise<Event[]> => {
           : data.date;
       }
       
-      return {
+      const event = {
         id: doc.id,
         ...formattedData
       } as Event;
+      
+      console.log(`Processed event ${doc.id}:`, event);
+      return event;
     });
     
-    console.log(`Processed ${events.length} events:`, events);
+    console.log(`Processed ${events.length} events total:`, events);
     return events;
   } catch (error) {
     console.error('Error fetching events:', error);
