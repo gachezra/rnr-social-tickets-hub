@@ -27,19 +27,35 @@ const HomePage: React.FC = () => {
     queryFn: async () => {
       try {
         console.log("Starting to fetch upcoming events...");
-        // Attempt to get all events first if filtering isn't working
-        const allEvents = await fetchEvents();
-        console.log("All events (unfiltered):", allEvents);
 
-        // Then try with the filter
-        const events = await fetchEvents("upcoming");
-        console.log("Fetched upcoming events (raw):", events);
-        console.log("Number of events fetched:", events.length);
-        console.log(
-          "First event details (if any):",
-          events.length > 0 ? events[0] : "No events"
-        );
-        return events.length > 0 ? events : allEvents;
+        // First try to get events with "upcoming" status
+        const upcomingEvents = await fetchEvents("upcoming");
+        console.log("Fetched upcoming events:", upcomingEvents);
+
+        if (upcomingEvents.length > 0) {
+          return upcomingEvents;
+        }
+
+        // If no upcoming events, try all events
+        console.log("No upcoming events found, fetching all events...");
+        const allEvents = await fetchEvents();
+        console.log("All events fetched:", allEvents);
+
+        // Filter client-side if needed (in case status filtering isn't working in Firestore)
+        const clientFilteredEvents = allEvents.filter((event) => {
+          const eventDate = new Date(event.date);
+          const today = new Date();
+          today.setHours(0, 0, 0, 0); // Reset time to beginning of day
+
+          return eventDate >= today && event.status === "upcoming";
+        });
+
+        console.log("Client-filtered upcoming events:", clientFilteredEvents);
+
+        // Return client-filtered events if any, otherwise return all events
+        return clientFilteredEvents.length > 0
+          ? clientFilteredEvents
+          : allEvents;
       } catch (err) {
         console.error("Error fetching upcoming events:", err);
         throw err;
@@ -86,8 +102,6 @@ const HomePage: React.FC = () => {
   };
 
   const displayedEvents = searchResults ?? upcomingEvents;
-  console.log("Displaying events final:", displayedEvents);
-  console.log("Displaying events length:", displayedEvents.length);
 
   return (
     <>
@@ -104,7 +118,12 @@ const HomePage: React.FC = () => {
                 Experiences
               </h1>
               <p className="text-lg md:text-xl text-muted-foreground mb-8 animate-fadeIn">
-              Elevate your social experiences with our diverse events.  From unforgettable Outdoor Cinema Nights under the Eldoret stars to the thrilling action of F1 Sunday live screenings, oonts and many more. We bring people together for unique and curates experiences. Stay tuned for our upcoming lineup of various other exciting events designed to entertain and engage!
+                Elevate your social experiences with our diverse events. From
+                unforgettable Outdoor Cinema Nights under the Eldoret stars to
+                the thrilling action of F1 Sunday live screenings, oonts and
+                many more. We bring people together for unique and curates
+                experiences. Stay tuned for our upcoming lineup of various other
+                exciting events designed to entertain and engage!
               </p>
               <div className="flex flex-col sm:flex-row justify-center gap-4 animate-fadeIn">
                 <Link to="/events" className="btn-primary py-3 px-6">

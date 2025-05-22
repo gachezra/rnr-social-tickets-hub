@@ -36,7 +36,8 @@ const AboutPage: React.FC = () => {
                     What makes our concept unique is our BYOB (Bring Your Own
                     Beverage) and BYOF (Bring Your Own Food) policy. We provide
                     the venue, the big screens, and the atmosphere - you bring
-                    your favorite refreshments! - only on outdoor cinemas and F1 events.
+                    your favorite refreshments! - only on outdoor cinemas and F1
+                    events.
                   </p>
                   <p>
                     Located in the outskirts of Eldoret, our venue has quickly
@@ -47,11 +48,15 @@ const AboutPage: React.FC = () => {
               </div>
 
               <div className="rounded-lg overflow-hidden">
-                <img
-                  src="/images/about-social-club.jpg"
-                  alt="RNR Social Lab Venue"
-                  className="w-full h-auto"
-                />
+                <iframe
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3989.6710108766183!2d35.38117397590879!3d0.4923542995028286!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x17811d002ba8866b%3A0x8756d8a8c405e2e!2sRnR%20Social%20lab!5e0!3m2!1sen!2ske!4v1747933523852!5m2!1sen!2ske"
+                  width="600"
+                  height="450"
+                  style="border:0;"
+                  allowfullscreen=""
+                  loading="lazy"
+                  referrerpolicy="no-referrer-when-downgrade"
+                ></iframe>
               </div>
             </div>
           </div>
@@ -142,7 +147,12 @@ const AboutPage: React.FC = () => {
                     <MapPin size={24} />
                   </div>
                   <h3 className="text-xl font-bold mb-2">Location</h3>
-                  <p>123 Event Street, Eldoret, Kenya</p>
+                  <a
+                    href="https://maps.app.goo.gl/qeVTYPeTMsq1Rg7P8"
+                    target="_blank"
+                  >
+                    RnR Social Lab, Eldoret, Kenya
+                  </a>
                 </div>
 
                 <div className="flex flex-col items-center">
@@ -150,7 +160,7 @@ const AboutPage: React.FC = () => {
                     <Phone size={24} />
                   </div>
                   <h3 className="text-xl font-bold mb-2">Phone</h3>
-                  <p>+254 712 345 678</p>
+                  <p>+254 704 433 367</p>
                 </div>
 
                 <div className="flex flex-col items-center">
@@ -158,7 +168,7 @@ const AboutPage: React.FC = () => {
                     <Mail size={24} />
                   </div>
                   <h3 className="text-xl font-bold mb-2">Email</h3>
-                  <p>info@rnrsocialclub.com</p>
+                  <p>info@rnrsociallab.com</p>
                 </div>
               </div>
             </div>

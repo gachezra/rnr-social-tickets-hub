@@ -20,7 +20,6 @@ import { Event, EventStatus } from "../types";
 
 export const fetchEvents = async (status?: EventStatus): Promise<Event[]> => {
   try {
-    // Enhanced debugging
     console.log(`Starting fetchEvents with status: ${status || "all"}`);
     console.log("Using eventsCollection reference:", eventsCollection);
 
@@ -41,18 +40,6 @@ export const fetchEvents = async (status?: EventStatus): Promise<Event[]> => {
 
     console.log(`Fetching events with status: ${status || "all"}`);
 
-    // Get a raw snapshot - alternative approach for debugging
-    const rawCollection = collection(db, "events");
-    const rawSnapshot = await getDocs(rawCollection);
-    console.log(`Raw collection has ${rawSnapshot.docs.length} documents`);
-    if (rawSnapshot.docs.length > 0) {
-      console.log(
-        "First raw document:",
-        rawSnapshot.docs[0].id,
-        rawSnapshot.docs[0].data()
-      );
-    }
-
     // Get filtered snapshot
     const snapshot = await getDocs(eventsQuery);
 
@@ -62,61 +49,118 @@ export const fetchEvents = async (status?: EventStatus): Promise<Event[]> => {
 
     if (snapshot.empty) {
       console.log("No events found in snapshot");
+
+      // If filtering by status returns empty, try without filter as fallback
+      if (status) {
+        console.log("Trying fallback query without status filter...");
+        const fallbackQuery = query(
+          eventsCollection,
+          orderBy("date", "asc"),
+          limit(50)
+        );
+        const fallbackSnapshot = await getDocs(fallbackQuery);
+
+        if (!fallbackSnapshot.empty) {
+          console.log(`Fallback found ${fallbackSnapshot.docs.length} events`);
+          return processEventDocs(fallbackSnapshot);
+        }
+      }
+
       return [];
-    } else {
-      console.log(`Found ${snapshot.docs.length} events in snapshot`);
     }
 
-    // Log all events raw data for debugging
-    snapshot.docs.forEach((doc) => {
-      console.log(`Raw event data for ${doc.id}:`, doc.data());
-    });
-
-    const events = snapshot.docs.map((doc) => {
-      const data = doc.data() as DocumentData;
-      console.log(`Processing event: ${doc.id}`, data);
-      console.log(`Event status: ${data.status}, type: ${typeof data.status}`);
-
-      // Convert Firestore timestamp to ISO string if needed
-      const formattedData: DocumentData = { ...data };
-
-      if (data.createdAt && typeof data.createdAt !== "string") {
-        formattedData.createdAt =
-          data.createdAt instanceof Timestamp
-            ? data.createdAt.toDate().toISOString()
-            : new Date().toISOString();
-      }
-
-      if (data.updatedAt && typeof data.updatedAt !== "string") {
-        formattedData.updatedAt =
-          data.updatedAt instanceof Timestamp
-            ? data.updatedAt.toDate().toISOString()
-            : new Date().toISOString();
-      }
-
-      // Handle date field if it's a Timestamp
-      if (data.date && typeof data.date !== "string") {
-        formattedData.date =
-          data.date instanceof Timestamp
-            ? data.date.toDate().toISOString().split("T")[0]
-            : data.date;
-      }
-
-      const event = {
-        id: doc.id,
-        ...formattedData,
-      } as Event;
-
-      console.log(`Processed event ${doc.id}:`, event);
-      return event;
-    });
-
-    console.log(`Processed ${events.length} events total:`, events);
-    return events;
+    console.log(`Found ${snapshot.docs.length} events in snapshot`);
+    return processEventDocs(snapshot);
   } catch (error) {
     console.error("Error fetching events:", error);
+
+    // Try a simpler query as last resort
+    try {
+      console.log("Attempting simple fallback query...");
+      const simpleQuery = collection(db, "events");
+      const simpleSnapshot = await getDocs(simpleQuery);
+
+      if (!simpleSnapshot.empty) {
+        console.log(`Simple query found ${simpleSnapshot.docs.length} events`);
+        return processEventDocs(simpleSnapshot);
+      }
+    } catch (fallbackError) {
+      console.error("Fallback query also failed:", fallbackError);
+    }
+
     throw error;
   }
+};
+
+// Helper function to process Firestore documents into Event objects
+const processEventDocs = (snapshot: QuerySnapshot<DocumentData>): Event[] => {
+  const events = snapshot.docs.map((doc) => {
+    const data = doc.data() as DocumentData;
+    console.log(`Processing event: ${doc.id}`, data);
+
+    // Convert Firestore timestamp to ISO string if needed
+    const formattedData: DocumentData = { ...data };
+
+    // Handle createdAt
+    if (data.createdAt) {
+      if (data.createdAt instanceof Timestamp) {
+        formattedData.createdAt = data.createdAt.toDate().toISOString();
+      } else if (typeof data.createdAt !== "string") {
+        formattedData.createdAt = new Date().toISOString();
+      }
+    } else {
+      formattedData.createdAt = new Date().toISOString();
+    }
+
+    // Handle updatedAt
+    if (data.updatedAt) {
+      if (data.updatedAt instanceof Timestamp) {
+        formattedData.updatedAt = data.updatedAt.toDate().toISOString();
+      } else if (typeof data.updatedAt !== "string") {
+        formattedData.updatedAt = new Date().toISOString();
+      }
+    } else {
+      formattedData.updatedAt = new Date().toISOString();
+    }
+
+    // Handle date field - ensure it's a string in YYYY-MM-DD format
+    if (data.date) {
+      if (data.date instanceof Timestamp) {
+        formattedData.date = data.date.toDate().toISOString().split("T")[0];
+      } else if (typeof data.date === "object" && data.date.toDate) {
+        // Handle Firestore Timestamp-like objects
+        formattedData.date = data.date.toDate().toISOString().split("T")[0];
+      } else if (typeof data.date !== "string") {
+        formattedData.date = new Date(data.date).toISOString().split("T")[0];
+      }
+    }
+
+    // Ensure required fields have default values
+    const event: Event = {
+      id: doc.id,
+      title: data.title || "Untitled Event",
+      description: data.description || "",
+      shortDescription: data.shortDescription || "",
+      date: formattedData.date || new Date().toISOString().split("T")[0],
+      startTime: data.startTime || "00:00",
+      endTime: data.endTime || "23:59",
+      location: data.location || "",
+      imageUrl: data.imageUrl || "",
+      price: typeof data.price === "number" ? data.price : 0,
+      byob: Boolean(data.byob),
+      maxCapacity:
+        typeof data.maxCapacity === "number" ? data.maxCapacity : 100,
+      status: data.status || "upcoming",
+      createdAt: formattedData.createdAt,
+      updatedAt: formattedData.updatedAt,
+    };
+
+    console.log(`Processed event ${doc.id}:`, event);
+    return event;
+  });
+
+  console.log(`Processed ${events.length} events total`);
+  return events;
 };
 
 export const fetchEvent = async (id: string): Promise<Event | null> => {
@@ -125,10 +169,15 @@ export const fetchEvent = async (id: string): Promise<Event | null> => {
 
     if (eventDoc.exists()) {
       const data = eventDoc.data() as DocumentData;
-      return {
-        id: eventDoc.id,
-        ...data,
-      } as Event;
+
+      // Use the same processing logic as fetchEvents
+      const processedEvents = processEventDocs({
+        docs: [eventDoc],
+        empty: false,
+        size: 1,
+      } as QuerySnapshot<DocumentData>);
+
+      return processedEvents.length > 0 ? processedEvents[0] : null;
     }
 
     return null;
@@ -153,7 +202,7 @@ export const createEvent = async (
     return {
       id: docRef.id,
       ...eventData,
-      createdAt: new Date().toISOString(), // For immediate use in client
+      createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     } as Event;
   } catch (error) {
@@ -181,14 +230,19 @@ export const updateEvent = async (
 
     await updateDoc(eventRef, updateData);
 
-    // Get the updated document
+    // Get the updated document and process it
     const updatedSnapshot = await getDoc(eventRef);
-    const data = updatedSnapshot.data() as DocumentData;
+    if (updatedSnapshot.exists()) {
+      const processedEvents = processEventDocs({
+        docs: [updatedSnapshot],
+        empty: false,
+        size: 1,
+      } as QuerySnapshot<DocumentData>);
 
-    return {
-      id,
-      ...data,
-    } as Event;
+      return processedEvents.length > 0 ? processedEvents[0] : null;
+    }
+
+    return null;
   } catch (error) {
     console.error("Error updating event:", error);
     throw error;
@@ -202,34 +256,30 @@ export const deleteEvent = async (id: string): Promise<boolean> => {
     return true;
   } catch (error) {
     console.error("Error deleting event:", error);
-    throw error;
+    throw false;
   }
 };
 
 export const searchEvents = async (searchQuery: string): Promise<Event[]> => {
   try {
-    // Firestore doesn't support full-text search natively
-    // For a basic implementation, we'll fetch all events and filter client-side
-    // For production, consider using Algolia or similar service
-
+    // Fetch all events first
     const snapshot = await getDocs(
       query(eventsCollection, orderBy("date", "asc"), limit(100))
     );
-    const allEvents = snapshot.docs.map(
-      (doc) =>
-        ({
-          id: doc.id,
-          ...doc.data(),
-        } as Event)
-    );
 
+    if (snapshot.empty) {
+      return [];
+    }
+
+    const allEvents = processEventDocs(snapshot);
     const lowerQuery = searchQuery.toLowerCase();
 
     return allEvents.filter(
       (event) =>
         event.title.toLowerCase().includes(lowerQuery) ||
         event.description.toLowerCase().includes(lowerQuery) ||
-        event.shortDescription.toLowerCase().includes(lowerQuery)
+        event.shortDescription.toLowerCase().includes(lowerQuery) ||
+        event.location.toLowerCase().includes(lowerQuery)
     );
   } catch (error) {
     console.error("Error searching events:", error);

@@ -204,7 +204,7 @@ const TermsPage: React.FC = () => {
                   </h2>
                   <p>
                     If you have any questions about these Terms and Conditions,
-                    please contact us at info@rnrsocialclub.com or call +254 712
+                    please contact us at info@rnrsociallab.com or call +254 712
                     345 678.
                   </p>
                 </section>

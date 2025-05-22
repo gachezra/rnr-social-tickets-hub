@@ -174,11 +174,11 @@ const PrivacyPage: React.FC = () => {
                     please contact us at:
                   </p>
                   <p className="mt-2">
-                    Email: privacy@rnrsocialclub.com
+                    Email: privacy@rnrsociallab.com
                     <br />
-                    Phone: +254 712 345 678
+                    Phone: +254 704 433 367
                     <br />
-                    Address: 123 Event Street, Eldoret, Kenya
+                    Address: RnR Social Lab, Eldoret, Kenya
                   </p>
                 </section>
 
