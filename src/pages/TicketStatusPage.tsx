@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import SiteHeader from '../components/SiteHeader';
 import SiteFooter from '../components/SiteFooter';
@@ -16,6 +16,7 @@ const TicketStatusPage: React.FC = () => {
   const [searchPerformed, setSearchPerformed] = useState(false);
   
   const location = useLocation();
+  const navigate = useNavigate();
   const queryParams = new URLSearchParams(location.search);
   const ticketIdParam = queryParams.get('ticketId');
   
@@ -36,6 +37,8 @@ const TicketStatusPage: React.FC = () => {
         const ticket = await fetchTicket(query);
         if (ticket) {
           foundTickets = [ticket];
+          // Update URL with the ticket ID for easy sharing
+          navigate(`/ticket-status?ticketId=${ticket.id}`, { replace: true });
         }
       } else {
         foundTickets = await fetchTicketByEmail(query);

@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Calendar, MapPin, Clock } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import SiteHeader from '../components/SiteHeader';
 import SiteFooter from '../components/SiteFooter';
 import EventCard from '../components/EventCard';
@@ -10,24 +11,32 @@ import { fetchEvents, searchEvents } from '../utils/api';
 import { Event } from '../types';
 
 const HomePage: React.FC = () => {
-  const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
   const [searchResults, setSearchResults] = useState<Event[] | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const loadEvents = async () => {
+  // Use React Query to fetch upcoming events
+  const { 
+    data: upcomingEvents = [], 
+    isLoading, 
+    error 
+  } = useQuery({
+    queryKey: ['upcomingEvents'],
+    queryFn: async () => {
       try {
         const events = await fetchEvents('upcoming');
-        setUpcomingEvents(events);
-      } catch (error) {
-        console.error('Error loading events:', error);
-      } finally {
-        setIsLoading(false);
+        console.log('Fetched upcoming events:', events.length);
+        return events;
+      } catch (err) {
+        console.error('Error fetching upcoming events:', err);
+        throw err;
       }
-    };
+    }
+  });
 
-    loadEvents();
-  }, []);
+  useEffect(() => {
+    if (error) {
+      console.error('Error loading events:', error);
+    }
+  }, [error]);
 
   const handleSearch = async (query: string) => {
     if (!query.trim()) {
@@ -51,8 +60,9 @@ const HomePage: React.FC = () => {
       
       <main>
         {/* Hero Section */}
-        <section className="bg-gradient-to-b from-background to-secondary/10 py-16 md:py-24">
-          <div className="container-custom">
+        <section className="bg-gradient-to-b from-background to-secondary/10 py-16 md:py-24 relative">
+          <div className="absolute inset-0 bg-[url('/images/f1-event.jpg')] bg-cover bg-center opacity-10"></div>
+          <div className="container-custom relative z-10">
             <div className="max-w-3xl mx-auto text-center">
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 animate-fadeIn">
                 <span className="text-primary">RNR Social Club</span> Watch Parties
@@ -78,7 +88,7 @@ const HomePage: React.FC = () => {
             <div className="max-w-3xl mx-auto text-center">
               <h2 className="text-3xl font-bold mb-6">How It Works</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
-                <div className="bg-background p-6 rounded-lg border border-border">
+                <div className="bg-background p-6 rounded-lg border border-border shadow-sm">
                   <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Calendar size={24} className="text-primary" />
                   </div>
@@ -88,7 +98,7 @@ const HomePage: React.FC = () => {
                   </p>
                 </div>
                 
-                <div className="bg-background p-6 rounded-lg border border-border">
+                <div className="bg-background p-6 rounded-lg border border-border shadow-sm">
                   <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
                     <MapPin size={24} className="text-primary" />
                   </div>
@@ -98,7 +108,7 @@ const HomePage: React.FC = () => {
                   </p>
                 </div>
                 
-                <div className="bg-background p-6 rounded-lg border border-border">
+                <div className="bg-background p-6 rounded-lg border border-border shadow-sm">
                   <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Clock size={24} className="text-primary" />
                   </div>
@@ -152,8 +162,9 @@ const HomePage: React.FC = () => {
         </section>
         
         {/* CTA Section */}
-        <section className="bg-primary py-16">
-          <div className="container-custom">
+        <section className="bg-primary py-16 relative overflow-hidden">
+          <div className="absolute inset-0 bg-[url('/images/premier-league-event.jpg')] bg-cover bg-center opacity-20"></div>
+          <div className="container-custom relative z-10">
             <div className="max-w-3xl mx-auto text-center">
               <h2 className="text-3xl font-bold text-primary-foreground mb-6">
                 Ready to Join the Fun?

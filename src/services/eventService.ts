@@ -10,6 +10,7 @@ import {
   deleteDoc,
   serverTimestamp,
   orderBy,
+  limit,
   DocumentData
 } from 'firebase/firestore';
 import { eventsCollection, db } from '../utils/firebase';
@@ -23,20 +24,29 @@ export const fetchEvents = async (status?: EventStatus): Promise<Event[]> => {
       eventsQuery = query(
         eventsCollection, 
         where('status', '==', status),
-        orderBy('date', 'asc')
+        orderBy('date', 'asc'),
+        limit(50) // Add a reasonable limit
       );
     } else {
-      eventsQuery = query(eventsCollection, orderBy('date', 'asc'));
+      eventsQuery = query(
+        eventsCollection, 
+        orderBy('date', 'asc'),
+        limit(50)
+      );
     }
 
+    console.log(`Fetching events with status: ${status || 'all'}`);
     const snapshot = await getDocs(eventsQuery);
-    return snapshot.docs.map(doc => {
+    const events = snapshot.docs.map(doc => {
       const data = doc.data() as DocumentData;
       return {
         id: doc.id,
         ...data
       } as Event;
     });
+    
+    console.log(`Found ${events.length} events`);
+    return events;
   } catch (error) {
     console.error('Error fetching events:', error);
     throw error;
@@ -131,7 +141,9 @@ export const searchEvents = async (query: string): Promise<Event[]> => {
     // For a basic implementation, we'll fetch all events and filter client-side
     // For production, consider using Algolia or similar service
     
-    const snapshot = await getDocs(eventsCollection);
+    const snapshot = await getDocs(
+      query(eventsCollection, orderBy('date', 'asc'), limit(100))
+    );
     const allEvents = snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
