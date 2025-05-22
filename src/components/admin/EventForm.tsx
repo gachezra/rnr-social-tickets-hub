@@ -43,7 +43,7 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit, onCancel }) => {
         price: event.price,
         maxCapacity: event.maxCapacity,
         status: event.status,
-        byob: byob
+        byob: event.byob,
       });
       setImagePreview(event.imageUrl);
     }
@@ -54,14 +54,24 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit, onCancel }) => {
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     >
   ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]:
-        name === "price" || name === "maxCapacity"
-          ? parseInt(value) || 0
-          : value,
-    }));
+    const { name, value, type } = e.target;
+
+    // Handle checkbox input
+    if (type === "checkbox") {
+      const { checked } = e.target as HTMLInputElement;
+      setFormData((prev) => ({
+        ...prev,
+        [name]: checked,
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]:
+          name === "price" || name === "maxCapacity"
+            ? parseInt(value) || 0
+            : value,
+      }));
+    }
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -378,6 +388,27 @@ const EventForm: React.FC<EventFormProps> = ({ event, onSubmit, onCancel }) => {
             required
             className="form-input w-full"
           />
+        </div>
+
+        {/* BYOB Checkbox */}
+        <div className="col-span-2">
+          <div className="flex items-center space-x-3">
+            <input
+              id="byob"
+              name="byob"
+              type="checkbox"
+              checked={formData.byob}
+              onChange={handleChange}
+              className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+            />
+            <label htmlFor="byob" className="form-label flex-1">
+              BYOB Event (Bring Your Own Beverage & Food)
+            </label>
+          </div>
+          <p className="text-xs text-muted-foreground mt-1 ml-7">
+            Check this box if attendees should bring their own food and
+            beverages. This will display a notice on the event page.
+          </p>
         </div>
       </div>
 
