@@ -1,9 +1,12 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Event } from '../types';
 import { createTicket } from '../utils/api';
+import { fetchTickets } from '../services/ticketService';
+import { useQuery } from '@tanstack/react-query';
+import { AlertCircle } from 'lucide-react';
 
 interface TicketReservationFormProps {
   event: Event;
@@ -16,8 +19,43 @@ const TicketReservationForm: React.FC<TicketReservationFormProps> = ({ event }) 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
+  // Fetch confirmed tickets for capacity check
+  const { data: confirmedTicketsCount = 0, isLoading: isLoadingTickets } = useQuery({
+    queryKey: ['confirmedTicketsCount', event.id],
+    queryFn: async () => {
+      try {
+        const tickets = await fetchTickets(event.id);
+        return tickets
+          .filter(ticket => ticket.status === 'confirmed' || ticket.status === 'checked-in')
+          .reduce((total, ticket) => total + (ticket.quantity || 1), 0);
+      } catch (error) {
+        console.error('Error fetching tickets:', error);
+        return 0;
+      }
+    },
+  });
+
+  // Calculate available capacity
+  const remainingSpots = Math.max(0, event.maxCapacity - confirmedTicketsCount);
+  const maxAllowedQuantity = Math.min(10, remainingSpots);
+  
+  // Adjust quantity if it exceeds available spots
+  useEffect(() => {
+    if (quantity > maxAllowedQuantity) {
+      setQuantity(maxAllowedQuantity);
+    }
+  }, [maxAllowedQuantity]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Check if there's enough capacity
+    if (quantity > remainingSpots) {
+      toast.error('Not enough spots available', {
+        description: `Only ${remainingSpots} spots remaining for this event.`,
+      });
+      return;
+    }
     
     try {
       setIsSubmitting(true);
@@ -45,9 +83,40 @@ const TicketReservationForm: React.FC<TicketReservationFormProps> = ({ event }) 
     }
   };
 
+  if (remainingSpots <= 0) {
+    return (
+      <div className="bg-card border border-border rounded-lg p-6">
+        <h3 className="text-xl font-bold mb-4">Ticket Reservations</h3>
+        <div className="bg-red-50 border border-red-200 p-4 rounded-md mb-6">
+          <div className="flex items-start">
+            <AlertCircle size={20} className="text-red-500 mr-3 mt-0.5" />
+            <div>
+              <h4 className="font-bold text-red-700 mb-1">Event Sold Out</h4>
+              <p className="text-red-600">
+                All spots for this event have been booked. Please check other events.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-card border border-border rounded-lg p-6">
       <h3 className="text-xl font-bold mb-4">Reserve Your Tickets</h3>
+      
+      {remainingSpots <= 5 && (
+        <div className="mb-4 bg-amber-50 border border-amber-200 p-3 rounded-md text-amber-800">
+          <div className="flex items-center">
+            <AlertCircle size={16} className="text-amber-500 mr-2" />
+            <p className="text-sm">
+              <strong>Limited availability!</strong> Only {remainingSpots} {remainingSpots === 1 ? 'spot' : 'spots'} left.
+            </p>
+          </div>
+        </div>
+      )}
+      
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label htmlFor="email" className="form-label">Email Address*</label>
@@ -94,21 +163,27 @@ const TicketReservationForm: React.FC<TicketReservationFormProps> = ({ event }) 
               id="quantity"
               type="number"
               min={1}
-              max={10}
+              max={maxAllowedQuantity}
               value={quantity}
-              onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
+              onChange={(e) => {
+                const val = parseInt(e.target.value) || 1;
+                setQuantity(Math.min(maxAllowedQuantity, Math.max(1, val)));
+              }}
               className="form-input w-16 mx-2 text-center"
               readOnly
             />
             <button
               type="button"
-              onClick={() => setQuantity(Math.min(10, quantity + 1))}
+              onClick={() => setQuantity(Math.min(maxAllowedQuantity, quantity + 1))}
               className="btn-secondary px-3 py-1 rounded-md"
-              disabled={quantity === 10}
+              disabled={quantity === maxAllowedQuantity}
             >
               +
             </button>
           </div>
+          <p className="text-xs text-muted-foreground mt-1">
+            Maximum {maxAllowedQuantity} tickets per reservation
+          </p>
         </div>
         
         <div className="border-t border-border pt-4 mt-4">
@@ -132,7 +207,7 @@ const TicketReservationForm: React.FC<TicketReservationFormProps> = ({ event }) 
           <button
             type="submit"
             className="btn-primary w-full py-3"
-            disabled={isSubmitting}
+            disabled={isSubmitting || remainingSpots <= 0}
           >
             {isSubmitting ? 'Processing...' : 'Reserve Tickets'}
           </button>

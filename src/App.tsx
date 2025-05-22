@@ -5,7 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "./context/ThemeContext";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Helmet, HelmetProvider } from "react-helmet-async";
 
 // Public pages
@@ -29,7 +29,14 @@ import NotFound from "./pages/NotFound";
 
 const App = () => {
   // Create a new QueryClient for each component instance
-  const [queryClient] = useState(() => new QueryClient());
+  const [queryClient] = useState(() => new QueryClient({
+    defaultOptions: {
+      queries: {
+        refetchOnWindowFocus: false,
+        retry: 1,
+      },
+    },
+  }));
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -60,6 +67,12 @@ const App = () => {
                 <Route path="/about" element={<AboutPage />} />
                 <Route path="/terms" element={<TermsPage />} />
                 <Route path="/privacy" element={<PrivacyPage />} />
+                
+                {/* Redirect for old URL format to ensure backward compatibility */}
+                <Route path="/ticket-status/:ticketId" element={<Navigate to={(location) => {
+                  const ticketId = location.pathname.split('/').pop();
+                  return `/ticket-status?ticketId=${ticketId}`;
+                }} replace />} />
                 
                 {/* Admin Routes */}
                 <Route path="/admin-panel" element={<AdminLayout />}>

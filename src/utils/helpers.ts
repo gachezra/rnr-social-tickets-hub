@@ -15,7 +15,7 @@ export const formatDisplayDate = (dateString: string | Date | null | undefined):
     }
     
     // If it's a timestamp from Firestore (object with seconds and nanoseconds)
-    if (typeof dateString === 'object' && 'seconds' in dateString) {
+    if (typeof dateString === 'object' && dateString !== null && 'seconds' in dateString) {
       const timestamp = new Date((dateString as any).seconds * 1000);
       return format(timestamp, 'EEEE, MMMM d, yyyy');
     }

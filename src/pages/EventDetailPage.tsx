@@ -6,8 +6,11 @@ import SiteHeader from '../components/SiteHeader';
 import SiteFooter from '../components/SiteFooter';
 import TicketReservationForm from '../components/TicketReservationForm';
 import { fetchEvent } from '../utils/api';
-import { Event } from '../types';
+import { fetchTickets } from '../services/ticketService';
+import { Progress } from '@/components/ui/progress';
+import { Event, Ticket } from '../types';
 import { formatDisplayDate, formatTime, getStatusText } from '../utils/helpers';
+import { useQuery } from '@tanstack/react-query';
 
 const EventDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -30,6 +33,23 @@ const EventDetailPage: React.FC = () => {
 
     loadEvent();
   }, [id]);
+
+  const { data: confirmedTicketsCount = 0, isLoading: isLoadingTickets } = useQuery({
+    queryKey: ['confirmedTicketsCount', id],
+    queryFn: async () => {
+      if (!id) return 0;
+      try {
+        const tickets = await fetchTickets(id);
+        return tickets
+          .filter(ticket => ticket.status === 'confirmed' || ticket.status === 'checked-in')
+          .reduce((total, ticket) => total + (ticket.quantity || 1), 0);
+      } catch (error) {
+        console.error('Error fetching tickets:', error);
+        return 0;
+      }
+    },
+    enabled: !!id
+  });
 
   if (isLoading) {
     return (
@@ -72,6 +92,11 @@ const EventDetailPage: React.FC = () => {
   const statusInfo = getStatusText(event.status);
   const isAvailableForBooking = event.status === 'upcoming' || event.status === 'ongoing';
 
+  // Calculate capacity
+  const remainingSpots = Math.max(0, event.maxCapacity - confirmedTicketsCount);
+  const capacityPercentage = Math.min(100, Math.round((confirmedTicketsCount / event.maxCapacity) * 100));
+  const isEventFull = remainingSpots <= 0;
+
   return (
     <>
       <SiteHeader />
@@ -84,7 +109,7 @@ const EventDetailPage: React.FC = () => {
             alt={event.title} 
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/85 to-background/50" />
         </div>
         
         <div className="container-custom -mt-20 relative z-10">
@@ -115,6 +140,24 @@ const EventDetailPage: React.FC = () => {
                 <div className="flex items-center">
                   <MapPin size={20} className="text-primary mr-3" />
                   <span>{event.location}</span>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="font-bold flex items-center">
+                    <Users size={18} className="mr-2 text-primary" />
+                    Capacity
+                  </h3>
+                  <span className={`text-sm font-medium px-2 py-1 rounded ${isEventFull ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}`}>
+                    {isEventFull ? 'SOLD OUT' : `${remainingSpots} spots remaining`}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Progress value={capacityPercentage} className="h-2 flex-1" />
+                  <span className="text-xs font-medium whitespace-nowrap">
+                    {confirmedTicketsCount}/{event.maxCapacity} booked
+                  </span>
                 </div>
               </div>
               
@@ -177,15 +220,19 @@ const EventDetailPage: React.FC = () => {
             </div>
             
             <div>
-              {isAvailableForBooking ? (
+              {isAvailableForBooking && !isEventFull ? (
                 <TicketReservationForm event={event} />
               ) : (
                 <div className="bg-card border border-border rounded-lg p-6">
                   <h3 className="text-xl font-bold mb-4">Ticket Reservations</h3>
                   <div className="bg-secondary/50 p-4 rounded-md mb-6 text-center">
-                    <p className="font-medium mb-2">Reservations Unavailable</p>
+                    <p className="font-medium mb-2">
+                      {isEventFull ? 'This Event is Sold Out' : 'Reservations Unavailable'}
+                    </p>
                     <p className="text-muted-foreground mb-4">
-                      This event is {event.status === 'past' ? 'already over' : 'not available for booking'}.
+                      {isEventFull 
+                        ? 'All spots for this event have been booked.' 
+                        : (event.status === 'past' ? 'This event is already over.' : 'This event is not available for booking.')}
                     </p>
                     <Link to="/events" className="btn-primary">
                       Browse Other Events

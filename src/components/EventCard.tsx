@@ -6,6 +6,7 @@ import { Event } from '../types';
 import { formatDisplayDate, formatTime, getStatusText } from '../utils/helpers';
 import { fetchTickets } from '../services/ticketService';
 import { useQuery } from '@tanstack/react-query';
+import { Progress } from './ui/progress';
 
 interface EventCardProps {
   event: Event;
@@ -32,7 +33,10 @@ const EventCard: React.FC<EventCardProps> = ({ event }) => {
   });
 
   const remainingSpots = Math.max(0, maxCapacity - confirmedTicketsCount);
+  const capacityPercentage = Math.min(100, Math.round((confirmedTicketsCount / maxCapacity) * 100));
   const [imageLoaded, setImageLoaded] = useState(false);
+  
+  const isEventFull = remainingSpots <= 0;
 
   return (
     <div className="event-card group h-full flex flex-col bg-card border border-border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
@@ -48,7 +52,7 @@ const EventCard: React.FC<EventCardProps> = ({ event }) => {
           className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
           onLoad={() => setImageLoaded(true)}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent opacity-70 group-hover:opacity-80 transition-opacity" />
         <div className={`absolute top-2 right-2 px-3 py-1 rounded-full text-xs font-medium ${statusInfo.colorClass}`}>
           {statusInfo.text}
         </div>
@@ -65,17 +69,30 @@ const EventCard: React.FC<EventCardProps> = ({ event }) => {
             <Clock size={16} className="mr-2 text-primary" />
             <span>{formatTime(startTime)}</span>
           </div>
-          <div className="flex items-center text-sm text-foreground/80">
-            <Users size={16} className="mr-2 text-primary" />
-            <span>{remainingSpots} spots remaining</span>
+          <div className="space-y-1">
+            <div className="flex items-center justify-between text-sm">
+              <div className="flex items-center">
+                <Users size={16} className="mr-2 text-primary" />
+                <span>{isEventFull ? 'Sold Out!' : `${remainingSpots} spots remaining`}</span>
+              </div>
+              <span className="text-xs font-medium">{capacityPercentage}%</span>
+            </div>
+            <Progress value={capacityPercentage} className="h-2" />
           </div>
         </div>
         <div className="flex items-center justify-between">
           <span className="font-bold">
             KES {price.toLocaleString()}
           </span>
-          <Link to={`/events/${id}`} className="btn-primary">
-            View Details
+          <Link 
+            to={`/events/${id}`} 
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+              isEventFull 
+                ? 'bg-gray-300 text-gray-600 cursor-not-allowed' 
+                : 'bg-primary text-primary-foreground hover:bg-primary/90'
+            }`}
+          >
+            {isEventFull ? 'Sold Out' : 'View Details'}
           </Link>
         </div>
       </div>

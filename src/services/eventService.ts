@@ -135,7 +135,7 @@ export const deleteEvent = async (id: string): Promise<boolean> => {
   }
 };
 
-export const searchEvents = async (query: string): Promise<Event[]> => {
+export const searchEvents = async (searchQuery: string): Promise<Event[]> => {
   try {
     // Firestore doesn't support full-text search natively
     // For a basic implementation, we'll fetch all events and filter client-side
@@ -149,7 +149,7 @@ export const searchEvents = async (query: string): Promise<Event[]> => {
       ...doc.data()
     } as Event));
     
-    const lowerQuery = query.toLowerCase();
+    const lowerQuery = searchQuery.toLowerCase();
     
     return allEvents.filter(event => 
       event.title.toLowerCase().includes(lowerQuery) ||
