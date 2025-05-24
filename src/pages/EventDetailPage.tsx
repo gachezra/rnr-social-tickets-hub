@@ -168,29 +168,45 @@ const EventDetailPage: React.FC = () => {
               </div>
 
               <div className="mb-6">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-bold flex items-center">
-                    <Users size={18} className="mr-2 text-primary" />
-                    Capacity
-                  </h3>
-                  <span
-                    className={`text-sm font-medium px-2 py-1 rounded ${
-                      isEventFull
-                        ? "bg-red-100 text-red-600"
-                        : "bg-green-100 text-green-600"
-                    }`}
-                  >
-                    {isEventFull
-                      ? "SOLD OUT"
-                      : `${remainingSpots} spots remaining`}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Progress value={capacityPercentage} className="h-2 flex-1" />
-                  <span className="text-xs font-medium whitespace-nowrap">
-                    {confirmedTicketsCount}/{event.maxCapacity} booked
-                  </span>
-                </div>
+                {event.maxCapacity - confirmedTicketsCount <= 5 ? (
+                  <>
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-bold flex items-center">
+                        <Users size={18} className="mr-2 text-primary" />
+                        Capacity
+                      </h3>
+                      <span
+                        className={`text-sm font-medium px-2 py-1 rounded ${
+                          isEventFull
+                            ? "bg-red-100 text-red-600"
+                            : "bg-green-100 text-green-600"
+                        }`}
+                      >
+                        {isEventFull
+                          ? "SOLD OUT"
+                          : `${remainingSpots} spots remaining`}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Progress
+                        value={capacityPercentage}
+                        className="h-2 flex-1"
+                      />
+                      <span className="text-xs font-medium whitespace-nowrap">
+                        {confirmedTicketsCount}/{event.maxCapacity} booked
+                      </span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex justify-start mb-2">
+                    <h3 className="font-bold flex items-center">
+                      <Users size={18} className="mr-2 text-primary" />
+                    </h3>
+                    <span className={`text-sm font-medium px-2 py-1`}>
+                      {event.maxCapacity}
+                    </span>
+                  </div>
+                )}
               </div>
 
               <div className="mb-8">
