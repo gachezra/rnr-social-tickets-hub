@@ -116,7 +116,7 @@ const TicketStatusResult: React.FC<TicketStatusResultProps> = ({
                 Please complete your payment via M-Pesa to confirm your
                 reservation.
               </p>
-              <div className="space-y-1 mb-4">
+              {/* <div className="space-y-1 mb-4">
                 <p className="text-yellow-600">
                   M-Pesa Pay Bill:{" "}
                   <span className="font-mono font-bold text-yellow-800">
@@ -129,7 +129,7 @@ const TicketStatusResult: React.FC<TicketStatusResultProps> = ({
                     {ticket.id}
                   </span>
                 </p>
-              </div>
+              </div> */}
               <a
                 href={paymentLink}
                 target="_blank"
