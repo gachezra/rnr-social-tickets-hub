@@ -21,7 +21,7 @@ const TicketStatusResult: React.FC<TicketStatusResultProps> = ({
 }) => {
   const statusInfo = getStatusText(ticket.status);
 
-  const paymentLink = `https://rnr-pay-1ybi.vercel.app/?amount=${
+  const paymentLink = `https://pay.rnrsociallab.com/?amount=${
     event.price * ticket.quantity
   }&ticketId=${ticket.tId}&phone=${ticket.mpesaPhone}`;
 
