@@ -17,6 +17,7 @@ import {
 } from "firebase/firestore";
 import { eventsCollection, db } from "../utils/firebase";
 import { Event, EventStatus } from "../types";
+import { determineEventStatus } from "../utils/eventStatusUpdater";
 
 export const fetchEvents = async (status?: EventStatus): Promise<Event[]> => {
   try {
@@ -130,7 +131,7 @@ const processEventDocs = (snapshot: QuerySnapshot<DocumentData>): Event[] => {
       byob: Boolean(data.byob),
       maxCapacity:
         typeof data.maxCapacity === "number" ? data.maxCapacity : 100,
-      status: data.status || "upcoming",
+      status: determineEventStatus(formattedData.date || new Date().toISOString().split("T")[0]), // Auto-determine status based on date
       createdAt: formattedData.createdAt,
       updatedAt: formattedData.updatedAt,
     };
