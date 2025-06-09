@@ -1,3 +1,4 @@
+
 import { format, parseISO } from 'date-fns';
 import { TicketStatus, EventStatus } from '../types';
 
@@ -72,4 +73,28 @@ export const getStatusText = (status: TicketStatus | EventStatus): { text: strin
 // Simple function for client-side "authentication"
 export const authenticate = (username: string, password: string, users: any[]): any | null => {
   return users.find(user => user.username === username && user.password === password) || null;
+};
+
+// Check if an event is upcoming (today or in the future)
+export const isEventUpcoming = (eventDate: string): boolean => {
+  const eventDateObj = new Date(eventDate);
+  const today = new Date();
+  
+  // Reset time to compare dates only
+  today.setHours(0, 0, 0, 0);
+  eventDateObj.setHours(0, 0, 0, 0);
+  
+  return eventDateObj >= today;
+};
+
+// Check if an event is in the past
+export const isEventPast = (eventDate: string): boolean => {
+  const eventDateObj = new Date(eventDate);
+  const today = new Date();
+  
+  // Reset time to compare dates only
+  today.setHours(0, 0, 0, 0);
+  eventDateObj.setHours(0, 0, 0, 0);
+  
+  return eventDateObj < today;
 };

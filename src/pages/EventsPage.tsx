@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import SiteHeader from "../components/SiteHeader";
 import SiteFooter from "../components/SiteFooter";
@@ -5,6 +6,7 @@ import EventCard from "../components/EventCard";
 import EventSearchBar from "../components/EventSearchBar";
 import { fetchEvents, searchEvents } from "../utils/api";
 import { Event } from "../types";
+import { isEventUpcoming, isEventPast } from "../utils/helpers";
 
 const EventsPage: React.FC = () => {
   const [events, setEvents] = useState<Event[]>([]);
@@ -18,6 +20,7 @@ const EventsPage: React.FC = () => {
     const loadEvents = async () => {
       try {
         const eventsData = await fetchEvents();
+        console.log("All events loaded:", eventsData.length);
         setEvents(eventsData);
         setFilteredEvents(eventsData);
       } catch (error) {
@@ -52,17 +55,15 @@ const EventsPage: React.FC = () => {
     if (filter === "all") {
       setFilteredEvents(events);
     } else if (filter === "upcoming") {
-      setFilteredEvents(
-        events.filter(
-          (event) => event.status === "upcoming" || event.status === "ongoing"
-        )
-      );
+      // Use client-side date checking for upcoming events
+      const upcomingEvents = events.filter((event) => isEventUpcoming(event.date));
+      console.log("Filtering upcoming events:", upcomingEvents.length);
+      setFilteredEvents(upcomingEvents);
     } else if (filter === "past") {
-      setFilteredEvents(
-        events.filter(
-          (event) => event.status === "past" || event.status === "cancelled"
-        )
-      );
+      // Use client-side date checking for past events
+      const pastEvents = events.filter((event) => isEventPast(event.date));
+      console.log("Filtering past events:", pastEvents.length);
+      setFilteredEvents(pastEvents);
     }
   };
 
@@ -120,7 +121,13 @@ const EventsPage: React.FC = () => {
             </div>
           ) : filteredEvents.length === 0 ? (
             <div className="text-center py-12 bg-card border border-border rounded-lg">
-              <p className="text-muted-foreground">No events found</p>
+              <p className="text-muted-foreground">
+                {activeFilter === "upcoming" 
+                  ? "No upcoming events found" 
+                  : activeFilter === "past" 
+                  ? "No past events found"
+                  : "No events found"}
+              </p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

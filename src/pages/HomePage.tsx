@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Calendar, MapPin, Clock } from "lucide-react";
@@ -10,6 +11,7 @@ import { searchEvents } from "../utils/api";
 import { Event } from "../types";
 import { fetchEvents } from "../services/eventService";
 import { useToast } from "@/components/ui/use-toast";
+import { isEventUpcoming } from "../utils/helpers";
 
 const HomePage: React.FC = () => {
   const [searchResults, setSearchResults] = useState<Event[] | null>(null);
@@ -26,29 +28,19 @@ const HomePage: React.FC = () => {
     queryKey: ["upcomingEvents"],
     queryFn: async () => {
       try {
-        // First try to get events with "upcoming" status
-        const upcomingEvents = await fetchEvents("upcoming");
-
-        if (upcomingEvents.length > 0) {
-          return upcomingEvents;
-        }
-
-        // If no upcoming events, try all events
+        // Get all events first
         const allEvents = await fetchEvents();
 
-        // Filter client-side if needed (in case status filtering isn't working in Firestore)
-        const clientFilteredEvents = allEvents.filter((event) => {
-          const eventDate = new Date(event.date);
-          const today = new Date();
-          today.setHours(0, 0, 0, 0); // Reset time to beginning of day
-
-          return eventDate >= today && event.status === "upcoming";
+        // Filter for truly upcoming events (today or future) using client-side logic
+        const filteredUpcomingEvents = allEvents.filter((event) => {
+          return isEventUpcoming(event.date);
         });
 
-        // Return client-filtered events if any, otherwise return all events
-        return clientFilteredEvents.length > 0
-          ? clientFilteredEvents
-          : allEvents;
+        console.log("Total events fetched:", allEvents.length);
+        console.log("Filtered upcoming events:", filteredUpcomingEvents.length);
+        console.log("Upcoming events:", filteredUpcomingEvents.map(e => ({ title: e.title, date: e.date, status: e.status })));
+
+        return filteredUpcomingEvents;
       } catch (err) {
         console.error("Error fetching upcoming events:", err);
         throw err;
@@ -76,7 +68,9 @@ const HomePage: React.FC = () => {
 
     try {
       const results = await searchEvents(query);
-      setSearchResults(results);
+      // Also filter search results to only show upcoming events
+      const upcomingSearchResults = results.filter((event) => isEventUpcoming(event.date));
+      setSearchResults(upcomingSearchResults);
     } catch (error) {
       console.error("Error searching events:", error);
     }
@@ -188,7 +182,7 @@ const HomePage: React.FC = () => {
               <div className="text-center py-12 bg-card border border-border rounded-lg">
                 <p className="text-muted-foreground">
                   {searchResults
-                    ? "No events found matching your search criteria."
+                    ? "No upcoming events found matching your search criteria."
                     : "No upcoming events at the moment. Check back soon!"}
                 </p>
               </div>
