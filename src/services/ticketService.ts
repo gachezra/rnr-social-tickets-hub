@@ -94,15 +94,22 @@ export const fetchTicketByEmail = async (email: string): Promise<Ticket[]> => {
 };
 
 export const createTicket = async (
-  ticketData: Omit<Ticket, "id" | "status" | "createdAt" | "updatedAt">
+  ticketData: Omit<Ticket, "id" | "status" | "createdAt" | "updatedAt" | "amount" | "tId">
 ): Promise<Ticket> => {
   try {
+    const event = await fetchEvent(ticketData.eventId);
+    if (!event) {
+      throw new Error(`Event with ID ${ticketData.eventId} not found`);
+    }
+
     const ticketId = generateTicketId();
+    const amount = event.price * ticketData.quantity;
 
     const newTicketData = {
       ...ticketData,
       email: ticketData.email.toLowerCase(),
       id: ticketId,
+      amount,
       status: "pending" as TicketStatus,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
@@ -115,7 +122,7 @@ export const createTicket = async (
       ...newTicketData,
       createdAt: new Date().toISOString(), // For immediate use in client
       updatedAt: new Date().toISOString(),
-    } as Ticket;
+    } as unknown as Ticket;
   } catch (error) {
     console.error("Error creating ticket:", error);
     throw error;

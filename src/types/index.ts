@@ -25,6 +25,7 @@ export interface Ticket {
   email: string;
   mpesaPhone?: string;
   quantity: number;
+  amount: number;
   status: TicketStatus;
   createdAt: string;
   updatedAt: string;

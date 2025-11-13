@@ -21,9 +21,7 @@ const TicketStatusResult: React.FC<TicketStatusResultProps> = ({
 }) => {
   const statusInfo = getStatusText(ticket.status);
 
-  const paymentLink = `https://pay.rnrsociallab.com/?amount=${
-    event.price * ticket.quantity
-  }&ticketId=${ticket.tId}&phone=${ticket.mpesaPhone}`;
+  const paymentLink = `https://pay.rnrsociallab.com/?ticketId=${ticket.tId}`;
 
   return (
     <div className="bg-card border border-border rounded-xl shadow-lg overflow-hidden animate-fadeIn">
